@@ -2,9 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
