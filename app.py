@@ -36,25 +36,37 @@ class User(db.Model):
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        name = request.form.get("name")
-        height = request.form.get("height", type=float)
-        weight = request.form.get("weight", type=float)
-        location = request.form.get("location")
+        try:
+            # Extract form data
+            username = request.form["username"]
+            password = request.form["password"]
 
-        if User.query.filter_by(username=username).first():
-            flash("Username already exists. Please choose a different one.")
-            return redirect(url_for("signup"))
+            # Validate form inputs
+            if not username or not password:
+                flash("Username and password are required.", "danger")
+                return render_template("signup.html")
 
-        new_user = User(username=username, password=password, name=name, height=height, weight=weight, location=location)
-        db.session.add(new_user)
-        db.session.commit()
+            # Check for duplicate username
+            if User.query.filter_by(username=username).first():
+                flash("Username already exists. Please choose a different one.", "warning")
+                return render_template("signup.html")
 
-        flash("Account created successfully! You can now log in.")
-        return redirect(url_for("login"))
+            # Add the new user to the database
+            new_user = User(username=username, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+
+            flash("Account created successfully! You can now log in.", "success")
+            return redirect(url_for("login"))
+
+        except Exception as e:
+            # Log unexpected exceptions
+            app.logger.error(f"Error during signup: {e}")
+            flash("An unexpected error occurred. Please try again.", "danger")
+            return render_template("signup.html")
 
     return render_template("signup.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
